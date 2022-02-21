@@ -12,8 +12,8 @@ tokenizer: {
     [2000, 2000], [4000, 4000], [8000, 8000], [16000, 16000],
   ],
   vocab_languages: {
-    "src": "ko",
-    "tgt": "en",
+    "src": "en",
+    "tgt": "ko",
   },
   vocab_type: {
     "src": "unigram", 
