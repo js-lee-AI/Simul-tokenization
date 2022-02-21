@@ -1,0 +1,21 @@
+path: {
+  data_dir: "../../../simul-tokenization/dataset/en-ko/",
+  corpus_name: "aihub_total.txt",
+  output_path: "./tokenizers/bpe_unigram/",
+}
+
+tokenizer: {
+  vocab_size: [
+    [2000, 2000], [2000, 4000], [2000, 8000], [2000, 16000],
+    [4000, 2000], [4000, 4000], [4000, 8000], [4000, 16000],
+    [8000, 2000], [8000, 4000], [8000, 8000], [8000, 16000],
+    [16000, 2000], [16000, 4000], [16000, 8000], [16000, 16000]
+  ],
+  vocab_type: {
+    "encoder": bpe,
+    "decoder": unigram,
+  },
+  args:{
+    num_threads: 32,
+  },
+}
