@@ -1,5 +1,5 @@
 path: {
-  data_dir: "../../../simul-tokenization/dataset/en-ko/",
+  data_dir: "./dataset/en-ko/",
   corpus_name: "aihub_ko.txt"
 }
 
