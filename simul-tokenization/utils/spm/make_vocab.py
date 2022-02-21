@@ -18,16 +18,23 @@ class spm_trainer:
         self.path_corpus = self.configs.path.data_dir + self.configs.path.corpus_name
         
         self.prints_args(self)
+        self.check_configs(self)
         
     @staticmethod
     def prints_args(self):
         self.check_path(self)
-        
         print(f'Your config file: {self.cfg_path_and_name}')
         print(f'Your configs: ')
         print(self.configs)
         time.sleep(7)
 
+    @staticmethod
+    def check_configs(self):
+        #if isinstance(self.configs.tokenizer.vocab_type, list):
+        print(self.configs.tokenizer.vocab_type)
+        if not self.configs.tokenizer.vocab_type in ['unigram', 'bpe', 'word', 'char']:
+            raise AssertionError(f'{self.configs.tokenizer.vocab_type} is not supported.')          
+        
     @staticmethod
     def check_path(self):
         if not os.path.exists(self.configs.path.data_dir):
