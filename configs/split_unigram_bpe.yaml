@@ -1,6 +1,9 @@
 path: {
   data_dir: "./dataset/en-ko/",
-  corpus_name: "aihub_total.txt",
+  corpus_name: {
+    "src": "aihub_en.txt", 
+    "tgt": "aihub_ko.txt",
+  },
   output_path: "./tokenizers/unigram_bpe/",
 }
 
@@ -12,7 +15,8 @@ tokenizer: {
     [16000, 2000], [16000, 4000], [16000, 8000], [16000, 16000]
   ],
   vocab_type: {
-    [unigram, bpe]
+    "src": "unigram", 
+    "tgt": "bpe",
   },
   args:{
     num_threads: 32,
