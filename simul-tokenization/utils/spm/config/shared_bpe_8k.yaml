@@ -1,0 +1,13 @@
+path: {
+  data_dir: "../../../simul-tokenization/dataset/en-ko/",
+  corpus_name: "aihub_total.txt"
+}
+
+tokenizer: {
+  prefix: "shared_bpe_8k",
+  vocab_size: 8000,
+  vocab_type: "bpe",
+  args:{
+    num_threads: 32,
+  },
+}
