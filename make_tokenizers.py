@@ -20,25 +20,28 @@ class spm_trainer:
         self.path_corpus = self.configs.path.data_dir + self.configs.path.corpus_name
         self.multiple_vocabsize = False
        
-        self.prints_args(self)
-        self.check_configs(self)
+        self.prints_args()
+        self.check_configs()
         
-        if self.multiple_vocabsize == True:
-            self.prefix = [cfg_name[:-5] + '_' + str(vocab_size//1000) + 'k' 
-                           for vocab_size in self.configs.tokenizer.vocab_size]
-        else:
-            self.prefix = cfg_name[:-5] + '_' + str(self.configs.tokenizer.vocab_size//1000) + 'k' 
-        # print(self.prefix)
-        
-    @staticmethod
+        # if self.multiple_vocabsize == True:
+        #     self.prefix = [cfg_name[:-5] + '_' + str(vocab_size//1000) + 'k' 
+        #                    for vocab_size in self.configs.tokenizer.vocab_size]
+        # else:
+        #     self.prefix = cfg_name[:-5] + '_' + str(self.configs.tokenizer.vocab_size//1000) + 'k' 
+
+        self.prefix = set_tokenizer_prefix(
+            multiple_flag = self.multiple_vocabsize,
+            vocab_sizes = self.configs.tokenizers.vocab_size,
+            cfg_name = cfg_name,
+        )
+     
     def prints_args(self):
-        self.check_and_move_path(self)
+        self.check_and_move_path()
         print(f'Your config file: {self.cfg_path_and_name}')
         print(f'Your configs: ')
         print(self.configs)
         time.sleep(7)
 
-    @staticmethod
     def check_configs(self):
         print(self.configs.tokenizer.vocab_size, type(self.configs.tokenizer.vocab_size))
         if isinstance(self.configs.tokenizer.vocab_size, ListConfig):
@@ -47,7 +50,6 @@ class spm_trainer:
         if not self.configs.tokenizer.vocab_type in ['unigram', 'bpe', 'word', 'char']:
             raise AssertionError(f'{self.configs.tokenizer.vocab_type} is not supported.')          
         
-    @staticmethod
     def check_and_move_path(self):
         if not os.path.exists(self.configs.path.data_dir):
             raise OSError('{} directory is not exists.'.format(self.configs.path.data_dir))
@@ -60,11 +62,26 @@ class spm_trainer:
         # get abstract paths
         self.path_corpus = os.path.abspath(self.path_corpus)
         
-        # make directory then move path 
+        # make directory then move output path 
         if not os.path.exists(os.path.abspath(self.configs.path.output_path)):
             os.mkdir(os.path.abspath(self.configs.path.output_path))
         else:
             os.chdir(os.path.abspath(self.configs.path.output_path))
+    
+    @staticmethod
+    def set_tokenizer_prefix(
+        multiple_flag,
+        vocab_sizes,
+        cfg_name,
+    ):
+        # multiple vocab size
+        if multiple_flag == True:
+            return [cfg_name[:-5] + '_' + str(vocab_size//1000) + 'k' 
+                           for vocab_size in vocab_sizes]
+        # single vocab size
+        else:
+            return cfg_name[:-5] + '_' + str(self.configs.tokenizer.vocab_size//1000) + 'k' 
+        
             
     def train(self):
         print('\n')
