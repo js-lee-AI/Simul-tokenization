@@ -106,7 +106,6 @@ class spm_trainer:
             prefix = dict()
             prefix['src'] = [vocab_languages['src'] + '_' + vocab_type['src'] + '_' + str(vocab_size[0]//1000) + 'k' 
                             for vocab_size in vocab_sizes]
-            
             prefix['tgt'] = [vocab_languages['tgt'] + '_' + vocab_type['tgt'] + '_' + str(vocab_size[1]//1000) + 'k' 
                             for vocab_size in vocab_sizes]
             return prefix
@@ -144,7 +143,6 @@ class spm_trainer:
                     print(f'Training {prefix} Tokenizer succeed')
             print('Training All of Tokenizers Completely succeed')
                 
-        
         else:
             # training multiple tokenizers
             if self.multiple_vocabsize == True:
