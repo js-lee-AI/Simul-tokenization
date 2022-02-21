@@ -130,9 +130,6 @@ class spm_trainer:
             print('Train SPM...')
             for idx, (key, prefixes) in enumerate(self.prefix.items()):
                 keys = ['src', 'tgt']
-                print('@'*100)
-                print(self.path_corpus[keys[idx]])
-                
                 for prefix, vocab_size in zip(prefixes, self.configs.tokenizer.vocab_size):
                     spm.SentencePieceTrainer.Train(f'--input={self.path_corpus[keys[idx]]} \
                                                      --model_prefix={prefix} \
