@@ -10,7 +10,7 @@ from omegaconf.dictconfig import DictConfig
 class spm_trainer:    
     def __init__(
         self,
-        cfg_path = './config/',
+        cfg_path = './configs/',
         cfg_name = 'vocab_baseline.yaml',
     ):  
         self.cfg_path_and_name = cfg_path + cfg_name
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     trainer = spm_trainer(
-        cfg_path = './config/', 
+        cfg_path = './configs/', 
         cfg_name = args.cfg_name,
     )
     trainer.train()
