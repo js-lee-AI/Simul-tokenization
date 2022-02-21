@@ -83,22 +83,22 @@ class spm_trainer:
             print('Train SPM...')
             for idx, prefix in enumerate(self.prefix):
                 spm.SentencePieceTrainer.Train(f'--input={self.path_corpus} \
-                                                --model_prefix={prefix} \
-                                                --vocab_size={self.configs.tokenizer.vocab_size[idx]} \
-                                                --model_type={self.configs.tokenizer.vocab_type} \
-                                                --num_threads={self.configs.tokenizer.args.num_threads} \
-                                                --max_sentence_length=99999')
+                                                 --model_prefix={prefix} \
+                                                 --vocab_size={self.configs.tokenizer.vocab_size[idx]} \
+                                                 --model_type={self.configs.tokenizer.vocab_type} \
+                                                 --num_threads={self.configs.tokenizer.args.num_threads} \
+                                                 --max_sentence_length=99999')
                 print(f'Training {self.prefix} Tokenizer succeed')
             print('Training All of Tokenizers Completely succeed')
         # training single tokenizer
         else:
             print('Train SPM...')
             spm.SentencePieceTrainer.Train(f'--input={self.path_corpus} \
-                                --model_prefix={self.configs.tokenizer.prefix} \
-                                --vocab_size={self.configs.tokenizer.vocab_size} \
-                                --model_type={self.configs.tokenizer.vocab_type} \
-                                --num_threads={self.configs.tokenizer.args.num_threads} \
-                                --max_sentence_length=99999')
+                                             --model_prefix={self.configs.tokenizer.prefix} \
+                                             --vocab_size={self.configs.tokenizer.vocab_size} \
+                                             --model_type={self.configs.tokenizer.vocab_type} \
+                                             --num_threads={self.configs.tokenizer.args.num_threads} \
+                                             --max_sentence_length=99999')
             print('Training Tokenizer Completely succeed')
             print('Finish...')
             
