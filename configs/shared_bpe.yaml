@@ -7,6 +7,7 @@ path: {
 tokenizer: {
   vocab_size: [4000, 8000, 16000, 32000, 64000, 128000],
   vocab_type: "bpe",
+  vocab_languages: "all",
   args:{
     num_threads: 32,
   },
