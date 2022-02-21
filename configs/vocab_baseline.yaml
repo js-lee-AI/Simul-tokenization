@@ -6,6 +6,7 @@ path: {
 tokenizer: {
   prefix: "ko_vocab",
   vocab_size: 16000,
+  vocab_languages: "all",
   vocab_type: "bpe",
   args:{
     num_threads: 32,
