@@ -22,16 +22,10 @@ class spm_trainer:
        
         self.prints_args()
         self.check_configs()
-        
-        # if self.multiple_vocabsize == True:
-        #     self.prefix = [cfg_name[:-5] + '_' + str(vocab_size//1000) + 'k' 
-        #                    for vocab_size in self.configs.tokenizer.vocab_size]
-        # else:
-        #     self.prefix = cfg_name[:-5] + '_' + str(self.configs.tokenizer.vocab_size//1000) + 'k' 
-
-        self.prefix = set_tokenizer_prefix(
+         
+        self.prefix = self.set_tokenizer_prefix(
             multiple_flag = self.multiple_vocabsize,
-            vocab_sizes = self.configs.tokenizers.vocab_size,
+            vocab_sizes = self.configs.tokenizer.vocab_size,
             cfg_name = cfg_name,
         )
      
@@ -82,7 +76,6 @@ class spm_trainer:
         else:
             return cfg_name[:-5] + '_' + str(self.configs.tokenizer.vocab_size//1000) + 'k' 
         
-            
     def train(self):
         print('\n')
         # training multiple tokenizers
@@ -116,7 +109,8 @@ if __name__ == "__main__":
                         help='hydra config file name (.yalm)')
     args = parser.parse_args()
     
-    trainer = spm_trainer(cfg_path = './config/', 
-                          cfg_name = args.cfg_name,
-                          )
+    trainer = spm_trainer(
+        cfg_path = './config/', 
+        cfg_name = args.cfg_name,
+    )
     trainer.train()
