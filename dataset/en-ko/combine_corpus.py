@@ -1,6 +1,6 @@
 import os
 
-dir_path = "/mnt/raid6/omanma1928/projects/SiMT/SCI/simul-tokenization/dataset/en-ko/"
+dir_path = "./"
 ko_corpus_file = "aihub_ko.txt"
 en_corpus_file = "aihub_en.txt"
 total_corpus_file = "aihub_total.txt"
