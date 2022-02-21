@@ -7,7 +7,7 @@ import sentencepiece as spm
 from omegaconf.listconfig import ListConfig
 from omegaconf.dictconfig import DictConfig
 
-class spm_trainer:    
+class Spm_trainer:    
     def __init__(
         self,
         cfg_path = './configs/',
@@ -172,7 +172,7 @@ if __name__ == "__main__":
                         help='hydra config file name (.yalm)')
     args = parser.parse_args()
     
-    trainer = spm_trainer(
+    trainer = Spm_trainer(
         cfg_path = './configs/', 
         cfg_name = args.cfg_name,
     )
