@@ -17,70 +17,70 @@ class SPMTrainer:
         self.cfg_path_and_name = os.path.join(cfg_path, cfg_name)
         hydra.initialize(cfg_path, cfg_name)
 
-        self.configs = hydra.compose(cfg_name)
+        self.config = hydra.compose(cfg_name)
         self.multiple_vocabsize = False
 
         # encoder/decoder uses same tokenization methods
-        if isinstance(self.configs.path.corpus_name, str):
+        if isinstance(self.config.path.corpus_name, str):
             self.path_corpus = os.path.join(
-                self.configs.path.data_dir, self.configs.path.corpus_name
+                self.config.path.data_dir, self.config.path.corpus_name
             )
             self.split_srctgt = False
         # encoder/decoder uses different tokenization methods
-        elif isinstance(self.configs.path.corpus_name, DictConfig):
+        elif isinstance(self.config.path.corpus_name, DictConfig):
             self.path_corpus = {
                 "src": os.path.join(
-                    self.configs.path.data_dir, self.configs.path.corpus_name["src"]
+                    self.config.path.data_dir, self.config.path.corpus_name["src"]
                 ),
                 "tgt": os.path.join(
-                    self.configs.path.data_dir, self.configs.path.corpus_name["tgt"]
+                    self.config.path.data_dir, self.config.path.corpus_name["tgt"]
                 ),
             }
             self.split_srctgt = True
         else:
             raise ValueError(
-                f"'{self.configs.path.corpus_name}' must be either string or dictionary, \not {type(self.configs.path.corpus_name)}"
+                f"'{self.config.path.corpus_name}' must be either string or dictionary, \not {type(self.config.path.corpus_name)}"
             )
 
         self.print_args()
-        self.check_configs()
+        self.check_config()
         self.move_to_output_path()
 
         self.prefix = self.set_tokenizer_prefix(
             multiple_flag=self.multiple_vocabsize,
-            vocab_sizes=self.configs.tokenizer.vocab_size,
+            vocab_sizes=self.config.tokenizer.vocab_size,
             cfg_name=cfg_name,
-            corpus_name=self.configs.path.corpus_name,
-            vocab_type=self.configs.tokenizer.vocab_type,
-            vocab_languages=self.configs.tokenizer.vocab_languages,
+            corpus_name=self.config.path.corpus_name,
+            vocab_type=self.config.tokenizer.vocab_type,
+            vocab_languages=self.config.tokenizer.vocab_languages,
         )
 
     def print_args(self):
         print(f"Your config file: {self.cfg_path_and_name}")
-        print(f"Your configs: ")
+        print(f"Your config: ")
         time.sleep(7)
 
-    def check_configs(self):
+    def check_config(self):
         available_vocab_types = ["unigram", "bpe", "word", "char"]
 
-        if isinstance(self.configs.tokenizer.vocab_size, ListConfig):
+        if isinstance(self.config.tokenizer.vocab_size, ListConfig):
             self.multiple_vocabsize = True
 
-        if isinstance(self.configs.tokenizer.vocab_type, str):
-            if self.configs.tokenizer.vocab_type not in available_vocab_types:
+        if isinstance(self.config.tokenizer.vocab_type, str):
+            if self.config.tokenizer.vocab_type not in available_vocab_types:
                 raise ValueError(
-                    f"'{self.configs.tokenizer.vocab_type}' is not in {available_vocab_types}."
+                    f"'{self.config.tokenizer.vocab_type}' is not in {available_vocab_types}."
                 )
-        elif isinstance(self.configs.tokenizer.vocab_type, DictConfig):
-            for vocab_type in self.configs.tokenizer.vocab_type.values():
+        elif isinstance(self.config.tokenizer.vocab_type, DictConfig):
+            for vocab_type in self.config.tokenizer.vocab_type.values():
                 if vocab_type not in available_vocab_types:
                     raise ValueError(
-                        f"'{self.configs.tokenizer.vocab_type}' is not in {available_vocab_types}."
+                        f"'{self.config.tokenizer.vocab_type}' is not in {available_vocab_types}."
                     )
 
-        if not os.path.isdir(self.configs.path.data_dir):
+        if not os.path.isdir(self.config.path.data_dir):
             raise OSError(
-                "'{}' directory is not exist.".format(self.configs.path.data_dir)
+                "'{}' directory is not exist.".format(self.config.path.data_dir)
             )
 
         if self.split_srctgt is True:
@@ -88,7 +88,7 @@ class SPMTrainer:
                 if not os.path.isfile(path):
                     raise OSError("'{}' file is not exist.".format(path))
                 else:
-                    print(f'Vocab Training Courpus Files; {idx+1}) {key}: "{path}"')
+                    print(f'vocab training courpus Files; {idx+1}) {key}: "{path}"')
                 # get abstract paths
                 self.path_corpus[key] = os.path.abspath(self.path_corpus[key])
         else:
@@ -97,13 +97,13 @@ class SPMTrainer:
                     '"{}" file is not exist.'.format(self.path_corpus)
                 )
             else:
-                print(f'Vocab Training Courpus File: "{self.path_corpus}"')
+                print(f'vocab training courpus file: "{self.path_corpus}"')
             # get abstract paths
             self.path_corpus = os.path.abspath(self.path_corpus)
 
     def move_to_output_path(self):
-        os.makedirs(self.configs.path.output_path, exist_ok=True)
-        os.chdir(os.path.abspath(self.configs.path.output_path))
+        os.makedirs(self.config.path.output_path, exist_ok=True)
+        os.chdir(os.path.abspath(self.config.path.output_path))
 
     @staticmethod
     def set_tokenizer_prefix(
@@ -164,21 +164,22 @@ class SPMTrainer:
             raise NotImplementedError
 
     def train(self):
+        print("\n")
         print("Train SPM...")
         # training split tokenizers
         if self.split_srctgt is True:
             for idx, (key, prefixes) in enumerate(self.prefix.items()):
                 keys = ["src", "tgt"]
                 for prefix, vocab_size in zip(
-                    prefixes, self.configs.tokenizer.vocab_size
+                    prefixes, self.config.tokenizer.vocab_size
                 ):
                     spm.SentencePieceTrainer.Train(
                         f"--input={self.path_corpus[keys[idx]]} \
                                                      --model_prefix={prefix} \
                                                      --vocab_size={vocab_size[idx]} \
-                                                     --model_type={self.configs.tokenizer.vocab_type[keys[idx]]} \
-                                                     --num_threads={self.configs.tokenizer.args.num_threads} \
-                                                     --max_sentence_length={self.configs.tokenizer.max_sentence_length}"
+                                                     --model_type={self.config.tokenizer.vocab_type[keys[idx]]} \
+                                                     --num_threads={self.config.tokenizer.args.num_threads} \
+                                                     --max_sentence_length={self.config.tokenizer.max_sentence_length}"
                     )
                     print(f"Training {prefix} tokenizer succeed")
         else:
@@ -188,10 +189,10 @@ class SPMTrainer:
                     spm.SentencePieceTrainer.Train(
                         f"--input={self.path_corpus} \
                                                      --model_prefix={prefix} \
-                                                     --vocab_size={self.configs.tokenizer.vocab_size[idx]} \
-                                                     --model_type={self.configs.tokenizer.vocab_type} \
-                                                     --num_threads={self.configs.tokenizer.args.num_threads} \
-                                                     --max_sentence_length={self.configs.tokenizer.max_sentence_length}"
+                                                     --vocab_size={self.config.tokenizer.vocab_size[idx]} \
+                                                     --model_type={self.config.tokenizer.vocab_type} \
+                                                     --num_threads={self.config.tokenizer.args.num_threads} \
+                                                     --max_sentence_length={self.config.tokenizer.max_sentence_length}"
                     )
                     print(f"Training {self.prefix} tokenizer succeed")
             # training single tokenizer
@@ -199,10 +200,10 @@ class SPMTrainer:
                 spm.SentencePieceTrainer.Train(
                     f"--input={self.path_corpus} \
                                                  --model_prefix={self.prefix} \
-                                                 --vocab_size={self.configs.tokenizer.vocab_size} \
-                                                 --model_type={self.configs.tokenizer.vocab_type} \
-                                                 --num_threads={self.configs.tokenizer.args.num_threads} \
-                                                 --max_sentence_length={self.configs.tokenizer.max_sentence_length}"
+                                                 --vocab_size={self.config.tokenizer.vocab_size} \
+                                                 --model_type={self.config.tokenizer.vocab_type} \
+                                                 --num_threads={self.config.tokenizer.args.num_threads} \
+                                                 --max_sentence_length={self.config.tokenizer.max_sentence_length}"
                 )
                 print("Training tokenizer completely succeed")
         print("Finish...")
