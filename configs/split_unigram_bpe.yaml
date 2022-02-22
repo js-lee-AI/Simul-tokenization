@@ -1,10 +1,10 @@
 path: {
-  data_dir: "./dataset/en-ko/",
+  data_dir: "./dataset/en-ko",
   corpus_name: {
     "src": "aihub_en.txt", 
     "tgt": "aihub_ko.txt",
   },
-  output_path: "./tokenizers/unigram_bpe/",
+  output_path: "./tokenizers/unigram_bpe",
 }
 
 tokenizer: {
@@ -19,7 +19,8 @@ tokenizer: {
     "src": "unigram", 
     "tgt": "bpe",
   },
+  max_sentence_length: 999999,
   args:{
-    num_threads: 32,
+    num_threads: 64,
   },
 }
