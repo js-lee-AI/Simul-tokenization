@@ -1,7 +1,7 @@
 path: {
   data_dir: "./dataset/en-ko",
   corpus_name: "aihub_ko.txt",
-  output_path: "./tokenizers/unigram_bpe",
+  output_path: "./tokenizers/baseline",
 }
 
 tokenizer: {
