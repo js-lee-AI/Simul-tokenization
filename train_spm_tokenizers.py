@@ -1,3 +1,4 @@
+from typing import Union, List, Dict, Tuple, Any
 import os
 import argparse
 import time
@@ -108,13 +109,13 @@ class SPMTrainer:
 
     @staticmethod
     def set_tokenizer_prefix(
-        multiple_flag,
-        vocab_sizes,
-        cfg_name,
-        corpus_name,
-        vocab_type,
-        vocab_languages,
-    ):
+        multiple_flag: bool,
+        vocab_sizes: Union[List[int], List[int], int],
+        cfg_name: str,
+        corpus_name: Union[Dict[str, str], str],
+        vocab_type: Union[Dict[str, str], str],
+        vocab_languages: Union[Dict[str, str], str],
+    ) -> Union[List[str], str]:
         # encoder/decoder use not same tokenization method
         if isinstance(corpus_name, DictConfig):
             prefix = list()
@@ -172,11 +173,16 @@ class SPMTrainer:
 
     @staticmethod
     def convert_to_parameters(
-        path_corpus,
-        model_prefix,
-        vocab_size,
-        model_type,
-    ):
+        path_corpus: Union[Dict[str, str], str],
+        model_prefix: Union[List[str], str],
+        vocab_size: Union[List[int], int],
+        model_type: Union[Dict[str, str], str],
+    ) -> Tuple[
+        Union[List[str], List[Any]],
+        Union[List[str], list],
+        Union[List[int], List[Any]],
+        Union[List[str], List[Any], Dict[str, str]],
+    ]:
         def modify_vocab_size(two_dimensional_list):
             dim = np.array(two_dimensional_list).ndim
             if dim == 2:
@@ -188,7 +194,7 @@ class SPMTrainer:
                 return output
             return two_dimensional_list
 
-        def modify_corpus_path_or_vocab_type(path_corpus_or_vocab_type, len_vocab):
+        def modify_corpus_path_or_vocab_type(path_corpus_or_vocab_type, vocab_length):
             # 'src' then 'tgt'
             ordered_path_corpus_or_vocab_type = list()
             ordered_path_corpus_or_vocab_type.append(path_corpus_or_vocab_type["src"])
@@ -196,7 +202,7 @@ class SPMTrainer:
 
             output = []
             for v in ordered_path_corpus_or_vocab_type:
-                for _ in range(len_vocab):
+                for _ in range(vocab_length):
                     output.append(v)
             return output
 
