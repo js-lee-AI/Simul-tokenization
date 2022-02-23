@@ -7,7 +7,9 @@ import sentencepiece as spm
 from omegaconf.listconfig import ListConfig
 from omegaconf.dictconfig import DictConfig
 
+import numpy as np
 
+# Todo: To work regardless of the order of the 'src', 'tgt' keys in 'split_unigram_bpe.yaml' file
 class SPMTrainer:
     def __init__(
         self,
@@ -57,7 +59,6 @@ class SPMTrainer:
 
     def print_args(self):
         print(f"Your config file: {self.cfg_path_and_name}")
-        print(f"Your config: ")
         time.sleep(7)
 
     def check_config(self):
@@ -116,25 +117,31 @@ class SPMTrainer:
     ):
         # encoder/decoder use not same tokenization method
         if isinstance(corpus_name, DictConfig):
-            prefix = dict()
-            prefix["src"] = [
-                vocab_languages["src"]
-                + "_"
-                + vocab_type["src"]
-                + "_"
-                + str(vocab_size[0] // 1000)
-                + "k"
-                for vocab_size in vocab_sizes
-            ]
-            prefix["tgt"] = [
-                vocab_languages["tgt"]
-                + "_"
-                + vocab_type["tgt"]
-                + "_"
-                + str(vocab_size[1] // 1000)
-                + "k"
-                for vocab_size in vocab_sizes
-            ]
+            prefix = list()
+            # source
+            prefix.extend(
+                [
+                    vocab_languages["src"]
+                    + "_"
+                    + vocab_type["src"]
+                    + "_"
+                    + str(vocab_size[0] // 1000)
+                    + "k"
+                    for vocab_size in vocab_sizes
+                ]
+            )
+            # target
+            prefix.extend(
+                [
+                    vocab_languages["tgt"]
+                    + "_"
+                    + vocab_type["tgt"]
+                    + "_"
+                    + str(vocab_size[1] // 1000)
+                    + "k"
+                    for vocab_size in vocab_sizes
+                ]
+            )
             return prefix
 
         # encoder/decoder use same tokenization method
@@ -163,50 +170,91 @@ class SPMTrainer:
         else:
             raise NotImplementedError
 
+    @staticmethod
+    def convert_to_parameters(
+        path_corpus,
+        model_prefix,
+        vocab_size,
+        model_type,
+    ):
+        def modify_vocab_size(two_dimensional_list):
+            dim = np.array(two_dimensional_list).ndim
+            if dim == 2:
+                output = []
+                for list_ in two_dimensional_list:
+                    output.append(list_[0])
+                for list_ in two_dimensional_list:
+                    output.append(list_[1])
+                return output
+            return two_dimensional_list
+
+        def modify_corpus_path_or_vocab_type(path_corpus_or_vocab_type, len_vocab):
+            # 'src' then 'tgt'
+            ordered_path_corpus_or_vocab_type = list()
+            ordered_path_corpus_or_vocab_type.append(path_corpus_or_vocab_type["src"])
+            ordered_path_corpus_or_vocab_type.append(path_corpus_or_vocab_type["tgt"])
+
+            output = []
+            for v in ordered_path_corpus_or_vocab_type:
+                for _ in range(len_vocab):
+                    output.append(v)
+            return output
+
+        # split_unigram_bpe.yaml
+        if isinstance(path_corpus, dict):
+            len_vocab = len(vocab_size)
+            vocab_size = modify_vocab_size(vocab_size)
+            path_corpus = modify_corpus_path_or_vocab_type(path_corpus, len_vocab)
+            model_type = modify_corpus_path_or_vocab_type(model_type, len_vocab)
+
+        # shared_bpe.yaml
+        if isinstance(path_corpus, str) and isinstance(model_prefix, list):
+            path_corpus = [path_corpus for i in range(len(model_prefix))]
+        if isinstance(model_type, str) and isinstance(model_prefix, list):
+            model_type = [model_type for i in range(len(model_prefix))]
+
+        # vocab_baseline.yaml
+        if (
+            isinstance(path_corpus, str)
+            and isinstance(model_prefix, str)
+            and isinstance(vocab_size, int)
+            and isinstance(model_type, str)
+        ):
+            path_corpus = [path_corpus]
+            model_prefix = [model_prefix]
+            vocab_size = [vocab_size]
+            model_type = [model_type]
+
+        return path_corpus, model_prefix, vocab_size, model_type
+
     def train(self):
-        print("\n")
-        print("Train SPM...")
-        # training split tokenizers
-        if self.split_srctgt is True:
-            for idx, (key, prefixes) in enumerate(self.prefix.items()):
-                keys = ["src", "tgt"]
-                for prefix, vocab_size in zip(
-                    prefixes, self.config.tokenizer.vocab_size
-                ):
-                    spm.SentencePieceTrainer.Train(
-                        f"--input={self.path_corpus[keys[idx]]} \
-                                                     --model_prefix={prefix} \
-                                                     --vocab_size={vocab_size[idx]} \
-                                                     --model_type={self.config.tokenizer.vocab_type[keys[idx]]} \
-                                                     --num_threads={self.config.tokenizer.args.num_threads} \
-                                                     --max_sentence_length={self.config.tokenizer.max_sentence_length}"
-                    )
-                    print(f"Training {prefix} tokenizer succeed")
-        else:
-            # training multiple tokenizers
-            if self.multiple_vocabsize is True:
-                for idx, prefix in enumerate(self.prefix):
-                    spm.SentencePieceTrainer.Train(
-                        f"--input={self.path_corpus} \
-                                                     --model_prefix={prefix} \
-                                                     --vocab_size={self.config.tokenizer.vocab_size[idx]} \
-                                                     --model_type={self.config.tokenizer.vocab_type} \
-                                                     --num_threads={self.config.tokenizer.args.num_threads} \
-                                                     --max_sentence_length={self.config.tokenizer.max_sentence_length}"
-                    )
-                    print(f"Training {self.prefix} tokenizer succeed")
-            # training single tokenizer
-            else:
-                spm.SentencePieceTrainer.Train(
-                    f"--input={self.path_corpus} \
-                                                 --model_prefix={self.prefix} \
-                                                 --vocab_size={self.config.tokenizer.vocab_size} \
-                                                 --model_type={self.config.tokenizer.vocab_type} \
-                                                 --num_threads={self.config.tokenizer.args.num_threads} \
-                                                 --max_sentence_length={self.config.tokenizer.max_sentence_length}"
-                )
-                print("Training tokenizer completely succeed")
-        print("Finish...")
+        (
+            self.path_corpus,
+            self.prefix,
+            self.config.tokenizer.vocab_size,
+            self.config.tokenizer.vocab_type,
+        ) = self.convert_to_parameters(
+            path_corpus=self.path_corpus,
+            model_prefix=self.prefix,
+            vocab_size=self.config.tokenizer.vocab_size,
+            model_type=self.config.tokenizer.vocab_type,
+        )
+
+        for path_corpus, prefix, vocab_size, vocab_type in zip(
+            self.path_corpus,
+            self.prefix,
+            self.config.tokenizer.vocab_size,
+            self.config.tokenizer.vocab_type,
+        ):
+            spm.SentencePieceTrainer.Train(
+                f"--input={path_corpus} \
+                                                --model_prefix={prefix} \
+                                                --vocab_size={vocab_size} \
+                                                --model_type={vocab_type} \
+                                                --num_threads={self.config.tokenizer.args.num_threads} \
+                                                --max_sentence_length={self.config.tokenizer.max_sentence_length}"
+            )
+            print(f"Training {prefix} tokenizer succeed")
 
 
 if __name__ == "__main__":
