@@ -214,9 +214,9 @@ class SPMTrainer:
 
         # shared_bpe.yaml
         if isinstance(path_corpus, str) and isinstance(model_prefix, list):
-            path_corpus = [path_corpus for i in range(len(model_prefix))]
+            path_corpus = [path_corpus for _ in range(len(model_prefix))]
         if isinstance(model_type, str) and isinstance(model_prefix, list):
-            model_type = [model_type for i in range(len(model_prefix))]
+            model_type = [model_type for _ in range(len(model_prefix))]
 
         # vocab_baseline.yaml
         if (
