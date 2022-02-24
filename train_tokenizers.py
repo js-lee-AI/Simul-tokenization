@@ -1,4 +1,6 @@
-from utils.train_spm_tokenizer import SPMTrainer
+from simultokenizer.utils.train_spm_tokenizer import SPMTrainer
+from simultokenizer.utils.morpheme_tokenizer import MorphemeTrainer
+from simultokenizer.utils.module import ConfigModule
 
 import argparse
 
@@ -13,8 +15,20 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    trainer = SPMTrainer(
+    vocab_type = ConfigModule.return_type_of_vocab(
         cfg_path="../config",
         cfg_name=args.cfg_name,
     )
+
+    if vocab_type == "morpheme_aware_BPE":
+        trainer = MorphemeTrainer(
+            cfg_path="../config",
+            cfg_name=args.cfg_name,
+        )
+    else:
+        trainer = SPMTrainer(
+            cfg_path="../config",
+            cfg_name=args.cfg_name,
+        )
+
     trainer.train()
