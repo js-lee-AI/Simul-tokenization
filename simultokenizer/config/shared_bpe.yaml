@@ -1,0 +1,15 @@
+path: {
+  data_dir: "./dataset/en-ko",
+  corpus_name: "aihub_total.txt",
+  output_path: "./tokenizers/bpe",
+}
+
+tokenizer: {
+  vocab_size: [4000, 8000, 16000, 32000, 64000, 128000],
+  vocab_languages: "all",
+  vocab_type: "bpe",
+  max_sentence_length: 999999,
+  args:{
+    num_threads: 32,
+  },
+}
