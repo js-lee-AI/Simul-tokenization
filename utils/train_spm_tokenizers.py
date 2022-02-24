@@ -1,34 +1,33 @@
-from typing import Union, List, Dict, Tuple, Any
 import os
-import argparse
 import time
+from typing import Union, List, Dict, Tuple, Any
+
 import hydra
-
-import sentencepiece as spm
-from omegaconf.listconfig import ListConfig
-from omegaconf.dictconfig import DictConfig
-
 import numpy as np
+import sentencepiece as spm
+from omegaconf.dictconfig import DictConfig
+from omegaconf.listconfig import ListConfig
+
 
 # Todo: To work regardless of the order of the 'src', 'tgt' keys in 'split_unigram_bpe.yaml' file
 class SPMTrainer:
     def __init__(
         self,
-        cfg_path="./config",
+        cfg_path="../config",
         cfg_name="vocab_baseline.yaml",
     ):
         self.cfg_path_and_name = os.path.join(cfg_path, cfg_name)
         hydra.initialize(cfg_path, cfg_name)
 
         self.config = hydra.compose(cfg_name)
-        self.multiple_vocabsize = False
+        self.multiple_vocab_size = False
 
         # encoder/decoder uses same tokenization methods
         if isinstance(self.config.path.corpus_name, str):
             self.path_corpus = os.path.join(
                 self.config.path.data_dir, self.config.path.corpus_name
             )
-            self.split_srctgt = False
+            self.split_src_and_tgt = False
         # encoder/decoder uses different tokenization methods
         elif isinstance(self.config.path.corpus_name, DictConfig):
             self.path_corpus = {
@@ -39,7 +38,7 @@ class SPMTrainer:
                     self.config.path.data_dir, self.config.path.corpus_name["tgt"]
                 ),
             }
-            self.split_srctgt = True
+            self.split_src_and_tgt = True
         else:
             raise ValueError(
                 f"'{self.config.path.corpus_name}' must be either string or dictionary, \not {type(self.config.path.corpus_name)}"
@@ -50,7 +49,7 @@ class SPMTrainer:
         self.move_to_output_path()
 
         self.prefix = self.set_tokenizer_prefix(
-            multiple_flag=self.multiple_vocabsize,
+            multiple_flag=self.multiple_vocab_size,
             vocab_sizes=self.config.tokenizer.vocab_size,
             cfg_name=cfg_name,
             corpus_name=self.config.path.corpus_name,
@@ -66,7 +65,7 @@ class SPMTrainer:
         available_vocab_types = ["unigram", "bpe", "word", "char"]
 
         if isinstance(self.config.tokenizer.vocab_size, ListConfig):
-            self.multiple_vocabsize = True
+            self.multiple_vocab_size = True
 
         if isinstance(self.config.tokenizer.vocab_type, str):
             if self.config.tokenizer.vocab_type not in available_vocab_types:
@@ -85,12 +84,12 @@ class SPMTrainer:
                 "'{}' directory is not exist.".format(self.config.path.data_dir)
             )
 
-        if self.split_srctgt is True:
+        if self.split_src_and_tgt is True:
             for idx, (key, path) in enumerate(self.path_corpus.items()):
                 if not os.path.isfile(path):
                     raise OSError("'{}' file is not exist.".format(path))
                 else:
-                    print(f'vocab training courpus Files; {idx+1}) {key}: "{path}"')
+                    print(f'vocab training courpus Files; {idx + 1}) {key}: "{path}"')
                 # get abstract paths
                 self.path_corpus[key] = os.path.abspath(self.path_corpus[key])
         else:
