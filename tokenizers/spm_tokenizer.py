@@ -41,5 +41,3 @@ if __name__ == "__main__":
     print(
         f"original english text: {en_text}\ntokenized tokens: {en_tokens}\n, detokenized text: {en_detokenized_tokens}\n"
     )
-
-    print(en_tokens)
