@@ -29,7 +29,7 @@ class MorphemeTrainer:
     @staticmethod
     def replace_whitespace(texts: List[str]) -> List[str]:
         """
-        Replace whitespace with '★'
+        Replace whitespaces with '★'
         """
         modified_text = []
         print("Converting whitespace in your corpus...")
