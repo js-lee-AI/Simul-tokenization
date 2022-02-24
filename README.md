@@ -1,1 +1,5 @@
-# Simul-tokenization
+# simultokenizer
+
+```console
+pip install setup.py develop
+```
