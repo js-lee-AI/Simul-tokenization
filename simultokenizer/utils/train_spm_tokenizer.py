@@ -274,18 +274,6 @@ class SPMTrainer(TokenizerModule):
             cmd += f"--bos_piece=[BOS] "
             cmd += f"--eos_piece=[EOS] "
             cmd += f"--unk_surface=[UNK] "
-            # if special_token is not None:
-            #     cmd += f"--user_defined_symbols=★ "
-
-            # spm.SentencePieceTrainer.Train(
-            #     f"--input={path_corpus} \
-            #                                     --model_prefix={prefix} \
-            #                                     --vocab_size={vocab_size} \
-            #                                     --model_type={vocab_type} \
-            #                                     --num_threads={self.config.tokenizer.args.num_threads} \
-            #                                     --max_sentence_length={self.config.tokenizer.max_sentence_length}"
-            # )
-            print(cmd)
             spm.SentencePieceTrainer.Train(cmd)
             print(f"Training {prefix} tokenizer succeed")
 
