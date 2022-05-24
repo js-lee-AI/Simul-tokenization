@@ -1,5 +1,5 @@
 # simultokenizer
 
 ```console
-pip install setup.py develop
+pip install -e .
 ```
